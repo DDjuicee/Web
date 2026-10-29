@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DDjuice</title>
+  <script>document.documentElement.classList.add("js");</script>
+  <style>
+    @font-face {
+      font-family: "Anton";
+      src: url("fonts/anton-regular.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+      font-display: block;
+    }
+
+    :root {
+      color-scheme: dark;
+      --bg: #000;
+      --ink: #fff;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    body {
+      min-height: 100dvh;
+      overflow: hidden;
+      font-family: "Noto Sans", Inter, "Liberation Sans", sans-serif;
+    }
+
+    .stage {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 7vh 4vw 8vh;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 100%;
+      font-family: Anton, "Noto Sans Display", "Arial Narrow", Impact, sans-serif;
+      font-weight: 400;
+      font-size: 11vw;
+      letter-spacing: 0.01em;
+      line-height: 0.84;
+      text-align: center;
+      text-transform: none;
+    }
+
+    .line {
+      display: block;
+      overflow: hidden;
+    }
+
+    .line > span {
+      display: block;
+      white-space: nowrap;
+      padding: 0.02em 0.06em 0.14em;
+    }
+
+    .js .line > span {
+      transform: translate3d(0, 120%, 0);
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 0.9rem;
+      margin-top: 1.6rem;
+    }
+
+    .js .actions {
+      opacity: 0;
+      transform: translate3d(0, 140%, 0);
+    }
+
+    .actions a {
+      color: var(--ink);
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      min-width: 9.5rem;
+      padding: 0.95rem 1.4rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .actions a:hover,
+    .actions a:focus-visible {
+      background: var(--ink);
+      color: var(--bg);
+      outline: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .js .line > span,
+      .js .actions {
+        transform: none;
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <h1>
+      <span class="line"><span>Dynamic and Dramatic</span></span>
+      <span class="line"><span>juice for fun</span></span>
+    </h1>
+    <nav class="actions" aria-label="Sections">
+      <a href="#">Work</a>
+      <a href="#">Contact</a>
+    </nav>
+  </main>
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var h1 = document.querySelector("h1");
+      var spans = Array.prototype.slice.call(document.querySelectorAll(".line > span"));
+      var actions = document.querySelector(".actions");
+      var stage = document.querySelector(".stage");
+
+      function availableWidth() {
+        var cs = getComputedStyle(stage);
+        return stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      }
+
+      function fit() {
+        var maxW = availableWidth();
+        var maxPx = Math.min(window.innerWidth * 0.22, window.innerHeight * 0.36);
+        var lo = 28;
+        var hi = Math.max(lo + 1, maxPx);
+
+        function fits(size) {
+          h1.style.fontSize = size + "px";
+          return spans.every(function (span) {
+            return span.scrollWidth <= maxW + 1;
+          });
+        }
+
+        if (!fits(lo)) return;
+        var i;
+        for (i = 0; i < 16; i += 1) {
+          var mid = (lo + hi) / 2;
+          if (fits(mid)) lo = mid;
+          else hi = mid;
+        }
+        h1.style.fontSize = Math.floor(lo) + "px";
+      }
+
+      function settle() {
+        spans.forEach(function (span) {
+          span.style.transform = "none";
+        });
+        actions.style.opacity = "1";
+        actions.style.transform = "none";
+        root.dataset.entrance = "settled";
+      }
+
+      function play() {
+        if (reduced) {
+          settle();
+          return;
+        }
+
+        var ease = "cubic-bezier(0.16, 1, 0.3, 1)";
+        var duration = 740;
+        var base = 80;
+        var stagger = 180;
+        spans.forEach(function (span, index) {
+          span.animate(
+            [
+              { transform: "translate3d(0, 120%, 0)" },
+              { transform: "translate3d(0, 0, 0)" }
+            ],
+            {
+              duration: duration,
+              delay: base + index * stagger,
+              easing: ease,
+              fill: "both"
+            }
+          );
+        });
+
+        var buttonDelay = base + (spans.length - 1) * stagger + duration + 70;
+        var buttonAnim = actions.animate(
+          [
+            { opacity: 0, transform: "translate3d(0, 130%, 0)" },
+            { opacity: 1, transform: "translate3d(0, 0, 0)" }
+          ],
+          {
+            duration: 620,
+            delay: buttonDelay,
+            easing: ease,
+            fill: "both"
+          }
+        );
+
+        root.dataset.entrance = "playing";
+        buttonAnim.finished.then(function () {
+          root.dataset.entrance = "settled";
+        });
+      }
+
+      function start() {
+        fit();
+        play();
+      }
+
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(start);
+      else start();
+
+      window.addEventListener("resize", function () {
+        if (root.dataset.entrance === "settled") fit();
+      });
+    })();
+  </script>
+</body>
+</html>
