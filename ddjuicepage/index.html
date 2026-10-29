@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DDjuice</title>
+  <script>document.documentElement.classList.add("js");</script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #000;
+      --ink: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    body {
+      min-height: 100dvh;
+      overflow: hidden;
+      font-family: "Noto Sans", Inter, "Liberation Sans", sans-serif;
+    }
+
+    .stage {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 12vh 7vw;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 100%;
+      font-family: "Noto Serif Display", "Noto Serif", "Liberation Serif", Georgia, serif;
+      font-weight: 400;
+      font-size: 8vw;
+      letter-spacing: 0.02em;
+      line-height: 1.08;
+      text-align: center;
+    }
+
+    .line {
+      display: block;
+      white-space: nowrap;
+    }
+
+    .word {
+      display: inline-block;
+    }
+
+    .js .word {
+      opacity: 0;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 0.9rem;
+      margin-top: 2.4rem;
+    }
+
+    .js .actions {
+      opacity: 0;
+    }
+
+    .actions a {
+      color: var(--ink);
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      min-width: 9.5rem;
+      padding: 0.95rem 1.4rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .actions a:hover,
+    .actions a:focus-visible {
+      background: var(--ink);
+      color: var(--bg);
+      outline: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .js .word,
+      .js .actions {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <h1>
+      <span class="line"><span class="word">Dynamic</span> <span class="word">and</span> <span class="word">Dramatic</span></span>
+      <span class="line"><span class="word">juice</span> <span class="word">for</span> <span class="word">fun</span></span>
+    </h1>
+    <nav class="actions" aria-label="Sections">
+      <a href="#">Work</a>
+      <a href="#">Contact</a>
+    </nav>
+  </main>
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var h1 = document.querySelector("h1");
+      var lines = Array.prototype.slice.call(document.querySelectorAll(".line"));
+      var words = Array.prototype.slice.call(document.querySelectorAll(".word"));
+      var actions = document.querySelector(".actions");
+      var stage = document.querySelector(".stage");
+
+      function availableWidth() {
+        var cs = getComputedStyle(stage);
+        return stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      }
+
+      function fit() {
+        var maxW = availableWidth();
+        var lo = 28;
+        var hi = Math.max(lo + 1, Math.min(window.innerWidth * 0.16, window.innerHeight * 0.22));
+
+        function fits(size) {
+          h1.style.fontSize = size + "px";
+          return lines.every(function (line) {
+            return line.scrollWidth <= maxW + 1;
+          });
+        }
+
+        if (!fits(lo)) return;
+        var i;
+        for (i = 0; i < 16; i += 1) {
+          var mid = (lo + hi) / 2;
+          if (fits(mid)) lo = mid;
+          else hi = mid;
+        }
+        h1.style.fontSize = Math.floor(lo) + "px";
+      }
+
+      function settle() {
+        words.forEach(function (word) {
+          word.style.opacity = "1";
+        });
+        actions.style.opacity = "1";
+        root.dataset.entrance = "settled";
+      }
+
+      function play() {
+        if (reduced) {
+          settle();
+          return;
+        }
+
+        var duration = 480;
+        var stagger = 160;
+        var base = 140;
+        words.forEach(function (word, index) {
+          word.animate(
+            [{ opacity: 0 }, { opacity: 1 }],
+            {
+              duration: duration,
+              delay: base + index * stagger,
+              easing: "ease-out",
+              fill: "both"
+            }
+          );
+        });
+
+        var buttonDelay = base + (words.length - 1) * stagger + duration + 220;
+        var buttonAnim = actions.animate(
+          [{ opacity: 0 }, { opacity: 1 }],
+          {
+            duration: 500,
+            delay: buttonDelay,
+            easing: "ease-out",
+            fill: "both"
+          }
+        );
+
+        root.dataset.entrance = "playing";
+        buttonAnim.finished.then(function () {
+          root.dataset.entrance = "settled";
+        });
+      }
+
+      function start() {
+        fit();
+        play();
+      }
+
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(start);
+      else start();
+
+      window.addEventListener("resize", function () {
+        if (root.dataset.entrance === "settled") fit();
+      });
+    })();
+  </script>
+</body>
+</html>
