@@ -530,6 +530,14 @@ function placeLabels() {
     back.style.top = top + "px";
     front.style.translate = "0 0";
     back.style.translate = "0 0";
+    const ow = choice.offsetWidth;
+    const oh = choice.offsetHeight;
+    const shift = 14 + (ow / 2) * geo.sin + (oh / 2) * geo.cos;
+    const orLeft = Math.max(8, Math.min(width - ow - 8, geo.cx + shift * geo.sin - ow / 2));
+    const orTop = Math.max(headerH + 8, Math.min(height - oh - 8, geo.cy - shift * geo.cos - oh / 2));
+    choice.style.left = orLeft + "px";
+    choice.style.top = orTop + "px";
+    choice.style.transform = "none";
     return;
   }
 
@@ -559,6 +567,9 @@ function placeLabels() {
   back.style.top = "";
   front.style.translate = "";
   back.style.translate = "";
+  choice.style.left = "";
+  choice.style.top = "";
+  choice.style.transform = "";
 }
 
 function placeCopy() {
