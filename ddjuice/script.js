@@ -565,11 +565,49 @@ function placeLabels() {
   back.style.left = (cx + edge) + "px";
   front.style.top = "";
   back.style.top = "";
-  front.style.translate = "";
-  back.style.translate = "";
+  // GSAP already centers these with translate3d(0, -50%, 0). Clearing the
+  // inline translate lets the stylesheet's translate stack on top of that.
+  front.style.translate = front.style.transform ? "none" : "";
+  back.style.translate = back.style.transform ? "none" : "";
   choice.style.left = "";
   choice.style.top = "";
   choice.style.transform = "";
+}
+
+function useChineseCopy(front, back) {
+  const lang = document.body.dataset.lang;
+  if (!lang || lang === "zh-CN" || !copy["zh-CN"]) {
+    return () => {};
+  }
+
+  const saved = [front.textContent, back.textContent];
+  front.textContent = copy["zh-CN"].frontCopy;
+  back.textContent = copy["zh-CN"].backCopy;
+  return () => {
+    const slots = [front, back].map((node) => {
+      const left = parseFloat(node.style.left);
+      const top = parseFloat(node.style.top);
+      return {
+        maxWidth: node.style.maxWidth,
+        width: node.style.width,
+        cx: left + node.offsetWidth / 2,
+        cy: top + node.offsetHeight / 2,
+        placed: node.style.left !== "" && node.style.top !== "" && !Number.isNaN(left) && !Number.isNaN(top)
+      };
+    });
+    front.textContent = saved[0];
+    back.textContent = saved[1];
+    [front, back].forEach((node, index) => {
+      const slot = slots[index];
+      if (!slot.placed) {
+        return;
+      }
+      node.style.maxWidth = slot.maxWidth;
+      node.style.width = slot.width;
+      node.style.left = (slot.cx - node.offsetWidth / 2) + "px";
+      node.style.top = (slot.cy - node.offsetHeight / 2) + "px";
+    });
+  };
 }
 
 function placeCopy() {
@@ -590,216 +628,221 @@ function placeCopy() {
     return;
   }
 
-  if (width < 700) {
+  const restoreCopy = useChineseCopy(front, back);
+  try {
+    if (width < 700) {
+      const header = document.querySelector(".top");
+      const headerH = header ? header.offsetHeight : 96;
+      const bandHeight = band.offsetHeight || 28;
+      const geo = bandGeometry(width, height, 0);
+      const lineAt = (y) => geo.cx + ((y - geo.cy) / geo.sin) * geo.cos;
+      const hostTop = figures.getBoundingClientRect().top;
+      const wordBottom = Math.max(
+        figures.querySelector(".or-front").getBoundingClientRect().bottom - hostTop,
+        figures.querySelector(".or-back").getBoundingClientRect().bottom - hostTop,
+        headerH + 36
+      );
+      const blocksInk = {
+        l: leftImg.offsetLeft + 443 * scale,
+        r: leftImg.offsetLeft + 962 * scale,
+        t: leftImg.offsetTop + 145 * scale,
+        b: leftImg.offsetTop + 897 * scale
+      };
+      const doodleInk = {
+        l: rightImg.offsetLeft + 100 * scale,
+        r: rightImg.offsetLeft + 603 * scale,
+        t: rightImg.offsetTop + 176 * scale,
+        b: rightImg.offsetTop + 845 * scale
+      };
+      const overlaps = (left, top, boxW, boxH, ink) => {
+        const right = left + boxW;
+        const bottom = top + boxH;
+        return right > ink.l - 8 && left < ink.r + 8 && bottom > ink.t - 8 && top < ink.b + 8;
+      };
+      let placed = null;
+      for (let maxW = Math.floor(width * 0.48); maxW >= 92; maxW -= 6) {
+        for (const node of [front, back]) {
+          node.style.maxWidth = maxW + "px";
+          node.style.width = "auto";
+        }
+        const fw = front.offsetWidth;
+        const fh = front.offsetHeight;
+        const bw = back.offsetWidth;
+        const bh = back.offsetHeight;
+        let frontSpot = null;
+        for (let top = wordBottom + 10; top < height - fh - 8; top += 6) {
+          const left = lineAt(top + fh / 2) + 10;
+          if (left < 8 || left + fw > width - 8) {
+            continue;
+          }
+          if (overlaps(left, top, fw, fh, doodleInk)) {
+            continue;
+          }
+          frontSpot = { left, top };
+          break;
+        }
+        let backSpot = null;
+        for (let top = height - bh - 10; top > wordBottom; top -= 6) {
+          const right = lineAt(top + bh / 2) - bandHeight - 16;
+          const left = right - bw;
+          if (left < 8) {
+            continue;
+          }
+          if (overlaps(left, top, bw, bh, blocksInk)) {
+            continue;
+          }
+          backSpot = { left, top };
+          break;
+        }
+        if (frontSpot && backSpot) {
+          placed = { frontSpot, backSpot };
+          break;
+        }
+      }
+      if (placed) {
+        front.style.left = placed.frontSpot.left + "px";
+        front.style.top = placed.frontSpot.top + "px";
+        back.style.left = placed.backSpot.left + "px";
+        back.style.top = placed.backSpot.top + "px";
+      }
+      return;
+    }
+
+    const bandHeight = band.offsetHeight || 46;
+    const geo = bandGeometry(width, height);
+    const { sin, cos, cx, cy } = geo;
+    const gap = 22;
     const header = document.querySelector(".top");
-    const headerH = header ? header.offsetHeight : 96;
-    const bandHeight = band.offsetHeight || 28;
-    const geo = bandGeometry(width, height, 0);
-    const lineAt = (y) => geo.cx + ((y - geo.cy) / geo.sin) * geo.cos;
-    const hostTop = figures.getBoundingClientRect().top;
-    const wordBottom = Math.max(
-      figures.querySelector(".or-front").getBoundingClientRect().bottom - hostTop,
-      figures.querySelector(".or-back").getBoundingClientRect().bottom - hostTop,
-      headerH + 36
-    );
-    const blocksInk = {
+    const marginY = Math.max((header ? header.offsetHeight : 64) + 14, 40);
+    const marginX = 28;
+    const blocks = {
       l: leftImg.offsetLeft + 443 * scale,
       r: leftImg.offsetLeft + 962 * scale,
       t: leftImg.offsetTop + 145 * scale,
       b: leftImg.offsetTop + 897 * scale
     };
-    const doodleInk = {
+    const doodle = {
       l: rightImg.offsetLeft + 100 * scale,
       r: rightImg.offsetLeft + 603 * scale,
       t: rightImg.offsetTop + 176 * scale,
       b: rightImg.offsetTop + 845 * scale
     };
-    const overlaps = (left, top, boxW, boxH, ink) => {
-      const right = left + boxW;
-      const bottom = top + boxH;
-      return right > ink.l - 8 && left < ink.r + 8 && bottom > ink.t - 8 && top < ink.b + 8;
+    const host = figures.getBoundingClientRect();
+    const labels = [".or-front", ".or-back", ".or-choice"].map((selector) => {
+      const node = figures.querySelector(selector);
+      if (!node) {
+        return null;
+      }
+      const bounds = node.getBoundingClientRect();
+      return {
+        l: bounds.left - host.left,
+        r: bounds.right - host.left,
+        t: bounds.top - host.top,
+        b: bounds.bottom - host.top
+      };
+    }).filter(Boolean);
+    const signed = (x, y) => (x - cx) * sin - (y - cy) * cos;
+    const corners = (c, boxW, boxH) => [
+      [c.x - boxW / 2, c.y - boxH / 2],
+      [c.x + boxW / 2, c.y - boxH / 2],
+      [c.x - boxW / 2, c.y + boxH / 2],
+      [c.x + boxW / 2, c.y + boxH / 2]
+    ];
+    const clearOfBand = (c, boxW, boxH, side) => {
+      const need = (side > 0 ? gap : bandHeight + gap) - 0.5;
+      return corners(c, boxW, boxH).every(([x, y]) => side * signed(x, y) >= need);
     };
-    let placed = null;
-    for (let maxW = Math.floor(width * 0.48); maxW >= 92; maxW -= 6) {
+    const inside = (c, boxW, boxH) => {
+      const left = c.x - boxW / 2;
+      const right = c.x + boxW / 2;
+      const top = c.y - boxH / 2;
+      const bottom = c.y + boxH / 2;
+      return left >= marginX && right <= width - marginX && top >= marginY && bottom <= height - marginY;
+    };
+    const hits = (c, boxW, boxH, ink) => {
+      const pad = 16;
+      const left = c.x - boxW / 2;
+      const right = c.x + boxW / 2;
+      const top = c.y - boxH / 2;
+      const bottom = c.y + boxH / 2;
+      return right > ink.l - pad && left < ink.r + pad && bottom > ink.t - pad && top < ink.b + pad;
+    };
+    const yOverlap = (c, boxH, ink) => {
+      const top = c.y - boxH / 2;
+      const bottom = c.y + boxH / 2;
+      return Math.max(0, Math.min(bottom, ink.b) - Math.max(top, ink.t));
+    };
+    const findSpot = (fw, fh, bw, bh) => {
+      const support = (boxW, boxH) => (boxW / 2) * sin + (boxH / 2) * cos;
+      const minU = bandHeight + gap + Math.max(support(fw, fh), support(bw, bh));
+      let best = null;
+      for (let u = minU; u <= minU + 340; u += 4) {
+        for (let v = -560; v <= 240; v += 4) {
+          const fc = { x: cx + u * sin + v * cos, y: cy - u * cos + v * sin };
+          const bc = { x: width - fc.x, y: height - fc.y };
+          if (fc.y >= cy - 28 || bc.y <= cy + 28) {
+            continue;
+          }
+          if (!inside(fc, fw, fh) || !inside(bc, bw, bh)) {
+            continue;
+          }
+          if (!clearOfBand(fc, fw, fh, 1) || !clearOfBand(bc, bw, bh, -1)) {
+            continue;
+          }
+          const axis = bandHeight + 12;
+          if (fc.x - fw / 2 < cx + axis || bc.x + bw / 2 > cx - axis) {
+            continue;
+          }
+          if (hits(fc, fw, fh, doodle) || hits(bc, bw, bh, blocks)) {
+            continue;
+          }
+          if (labels.some((label) => hits(fc, fw, fh, label) || hits(bc, bw, bh, label))) {
+            continue;
+          }
+          const score = (u - minU) * 4 + Math.abs(v) + (yOverlap(fc, fh, doodle) + yOverlap(bc, bh, blocks)) * 3;
+          if (!best || score < best.score) {
+            best = { fc, fw, fh, bw, bh, score };
+          }
+        }
+      }
+      return best;
+    };
+    const measureAt = (maxWidth) => {
       for (const node of [front, back]) {
-        node.style.maxWidth = maxW + "px";
-        node.style.width = "auto";
+        node.style.maxWidth = maxWidth + "px";
+        node.style.width = "max-content";
       }
-      const fw = front.offsetWidth;
-      const fh = front.offsetHeight;
-      const bw = back.offsetWidth;
-      const bh = back.offsetHeight;
-      let frontSpot = null;
-      for (let top = wordBottom + 10; top < height - fh - 8; top += 6) {
-        const left = lineAt(top + fh / 2) + 10;
-        if (left < 8 || left + fw > width - 8) {
-          continue;
-        }
-        if (overlaps(left, top, fw, fh, doodleInk)) {
-          continue;
-        }
-        frontSpot = { left, top };
-        break;
-      }
-      let backSpot = null;
-      for (let top = height - bh - 10; top > wordBottom; top -= 6) {
-        const right = lineAt(top + bh / 2) - bandHeight - 16;
-        const left = right - bw;
-        if (left < 8) {
-          continue;
-        }
-        if (overlaps(left, top, bw, bh, blocksInk)) {
-          continue;
-        }
-        backSpot = { left, top };
-        break;
-      }
-      if (frontSpot && backSpot) {
-        placed = { frontSpot, backSpot };
-        break;
-      }
-    }
-    if (placed) {
-      front.style.left = placed.frontSpot.left + "px";
-      front.style.top = placed.frontSpot.top + "px";
-      back.style.left = placed.backSpot.left + "px";
-      back.style.top = placed.backSpot.top + "px";
-    }
-    return;
-  }
-
-  const bandHeight = band.offsetHeight || 46;
-  const geo = bandGeometry(width, height);
-  const { sin, cos, cx, cy } = geo;
-  const gap = 22;
-  const header = document.querySelector(".top");
-  const marginY = Math.max((header ? header.offsetHeight : 64) + 14, 40);
-  const marginX = 28;
-  const blocks = {
-    l: leftImg.offsetLeft + 443 * scale,
-    r: leftImg.offsetLeft + 962 * scale,
-    t: leftImg.offsetTop + 145 * scale,
-    b: leftImg.offsetTop + 897 * scale
-  };
-  const doodle = {
-    l: rightImg.offsetLeft + 100 * scale,
-    r: rightImg.offsetLeft + 603 * scale,
-    t: rightImg.offsetTop + 176 * scale,
-    b: rightImg.offsetTop + 845 * scale
-  };
-  const host = figures.getBoundingClientRect();
-  const labels = [".or-front", ".or-back", ".or-choice"].map((selector) => {
-    const node = figures.querySelector(selector);
-    if (!node) {
-      return null;
-    }
-    const bounds = node.getBoundingClientRect();
-    return {
-      l: bounds.left - host.left,
-      r: bounds.right - host.left,
-      t: bounds.top - host.top,
-      b: bounds.bottom - host.top
+      return [front.offsetWidth, front.offsetHeight, back.offsetWidth, back.offsetHeight];
     };
-  }).filter(Boolean);
-  const signed = (x, y) => (x - cx) * sin - (y - cy) * cos;
-  const corners = (c, boxW, boxH) => [
-    [c.x - boxW / 2, c.y - boxH / 2],
-    [c.x + boxW / 2, c.y - boxH / 2],
-    [c.x - boxW / 2, c.y + boxH / 2],
-    [c.x + boxW / 2, c.y + boxH / 2]
-  ];
-  const clearOfBand = (c, boxW, boxH, side) => {
-    const need = (side > 0 ? gap : bandHeight + gap) - 0.5;
-    return corners(c, boxW, boxH).every(([x, y]) => side * signed(x, y) >= need);
-  };
-  const inside = (c, boxW, boxH) => {
-    const left = c.x - boxW / 2;
-    const right = c.x + boxW / 2;
-    const top = c.y - boxH / 2;
-    const bottom = c.y + boxH / 2;
-    return left >= marginX && right <= width - marginX && top >= marginY && bottom <= height - marginY;
-  };
-  const hits = (c, boxW, boxH, ink) => {
-    const pad = 16;
-    const left = c.x - boxW / 2;
-    const right = c.x + boxW / 2;
-    const top = c.y - boxH / 2;
-    const bottom = c.y + boxH / 2;
-    return right > ink.l - pad && left < ink.r + pad && bottom > ink.t - pad && top < ink.b + pad;
-  };
-  const yOverlap = (c, boxH, ink) => {
-    const top = c.y - boxH / 2;
-    const bottom = c.y + boxH / 2;
-    return Math.max(0, Math.min(bottom, ink.b) - Math.max(top, ink.t));
-  };
-  const findSpot = (fw, fh, bw, bh) => {
-    const support = (boxW, boxH) => (boxW / 2) * sin + (boxH / 2) * cos;
-    const minU = bandHeight + gap + Math.max(support(fw, fh), support(bw, bh));
-    let best = null;
-    for (let u = minU; u <= minU + 340; u += 4) {
-      for (let v = -560; v <= 240; v += 4) {
-        const fc = { x: cx + u * sin + v * cos, y: cy - u * cos + v * sin };
-        const bc = { x: width - fc.x, y: height - fc.y };
-        if (fc.y >= cy - 28 || bc.y <= cy + 28) {
-          continue;
-        }
-        if (!inside(fc, fw, fh) || !inside(bc, bw, bh)) {
-          continue;
-        }
-        if (!clearOfBand(fc, fw, fh, 1) || !clearOfBand(bc, bw, bh, -1)) {
-          continue;
-        }
-        const axis = bandHeight + 12;
-        if (fc.x - fw / 2 < cx + axis || bc.x + bw / 2 > cx - axis) {
-          continue;
-        }
-        if (hits(fc, fw, fh, doodle) || hits(bc, bw, bh, blocks)) {
-          continue;
-        }
-        if (labels.some((label) => hits(fc, fw, fh, label) || hits(bc, bw, bh, label))) {
-          continue;
-        }
-        const score = (u - minU) * 4 + Math.abs(v) + (yOverlap(fc, fh, doodle) + yOverlap(bc, bh, blocks)) * 3;
-        if (!best || score < best.score) {
-          best = { fc, fw, fh, bw, bh, score };
-        }
+
+    const loose = measureAt(4000);
+    let placed = null;
+    const widest = Math.ceil(Math.max(loose[0], loose[2], 220)) + 8;
+    for (let maxWidth = widest; maxWidth >= 200; maxWidth -= 12) {
+      const size = measureAt(maxWidth);
+      if (size.some((value) => !value)) {
+        continue;
+      }
+      placed = findSpot(...size);
+      if (placed) {
+        break;
       }
     }
-    return best;
-  };
-  const measureAt = (maxWidth) => {
-    for (const node of [front, back]) {
-      node.style.maxWidth = maxWidth + "px";
-      node.style.width = "max-content";
-    }
-    return [front.offsetWidth, front.offsetHeight, back.offsetWidth, back.offsetHeight];
-  };
 
-  const loose = measureAt(4000);
-  let placed = null;
-  const widest = Math.ceil(Math.max(loose[0], loose[2], 220)) + 8;
-  for (let maxWidth = widest; maxWidth >= 200; maxWidth -= 12) {
-    const size = measureAt(maxWidth);
-    if (size.some((value) => !value)) {
-      continue;
-    }
-    placed = findSpot(...size);
-    if (placed) {
-      break;
-    }
+    const fw = placed ? placed.fw : loose[0];
+    const fh = placed ? placed.fh : loose[1];
+    const bw = placed ? placed.bw : loose[2];
+    const bh = placed ? placed.bh : loose[3];
+    const fallbackU = bandHeight + gap + Math.max(fw, bw) / 2 * sin + Math.max(fh, bh) / 2 * cos;
+    const fc = placed ? placed.fc : { x: cx + fallbackU * sin, y: cy - fallbackU * cos };
+    const bc = { x: width - fc.x, y: height - fc.y };
+    front.style.left = (fc.x - fw / 2) + "px";
+    front.style.top = (fc.y - fh / 2) + "px";
+    back.style.left = (bc.x - bw / 2) + "px";
+    back.style.top = (bc.y - bh / 2) + "px";
+  } finally {
+    restoreCopy();
   }
-
-  const fw = placed ? placed.fw : loose[0];
-  const fh = placed ? placed.fh : loose[1];
-  const bw = placed ? placed.bw : loose[2];
-  const bh = placed ? placed.bh : loose[3];
-  const fallbackU = bandHeight + gap + Math.max(fw, bw) / 2 * sin + Math.max(fh, bh) / 2 * cos;
-  const fc = placed ? placed.fc : { x: cx + fallbackU * sin, y: cy - fallbackU * cos };
-  const bc = { x: width - fc.x, y: height - fc.y };
-  front.style.left = (fc.x - fw / 2) + "px";
-  front.style.top = (fc.y - fh / 2) + "px";
-  back.style.left = (bc.x - bw / 2) + "px";
-  back.style.top = (bc.y - bh / 2) + "px";
 }
 
 function openFigures() {
