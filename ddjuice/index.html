@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DDjuice · 朱睿哲</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="gate-open">
+    <div class="gate" role="dialog" aria-modal="true" aria-labelledby="gate-slogan">
+      <p class="gate-slogan" id="gate-slogan">
+        <span class="line">DESKTOP AND DREAMING</span>
+        <span class="line">JUICE FOR FUN</span>
+      </p>
+      <div class="gate-foot">
+        <div class="gate-progress" aria-hidden="true"><span class="gate-progress-fill"></span></div>
+        <button type="button" class="gate-enter">Enter</button>
+      </div>
+    </div>
+
+    <header class="top" id="top" inert data-gate-inert>
+      <a class="mark" href="#top">DDjuice</a>
+      <div class="top-right">
+        <nav aria-label="Sections">
+          <a href="#camps" data-i18n="navCamps">两端</a>
+          <a href="#front" data-i18n="navFront">前端</a>
+          <a href="#back" data-i18n="navBack">后端</a>
+          <a href="#both" data-i18n="navBoth">本人</a>
+          <a href="#contact" data-i18n="navContact">联系</a>
+        </nav>
+        <div class="langs" role="group" aria-label="选择语言" data-i18n-aria="langGroup">
+          <button type="button" data-lang="zh-CN" aria-pressed="true">简体</button>
+          <button type="button" data-lang="zh-TW">繁体</button>
+          <button type="button" data-lang="en">English</button>
+          <button type="button" data-lang="ja">日本語</button>
+        </div>
+      </div>
+    </header>
+
+    <main inert data-gate-inert>
+      <section id="camps" class="chapter">
+        <p class="kicker" data-i18n="campsKicker">两端</p>
+        <h1 class="chapter-title" data-i18n-html="campsTitle">前端与后端，<br>是技术上的<span class="keep">两个阵营</span>。</h1>
+        <div class="chapter-copy" data-i18n-html="campsBody">
+          <p>从事技术的人，通常归入前端或后端。</p>
+          <p>多数人选定其中一边，并以这一边作为专长。</p>
+        </div>
+        <div class="figures">
+          <div class="split split-right">
+            <p class="or-label or-back">BACK</p>
+            <img class="camp-figure camp-figure-right" src="assets/frontend-doodle.png" width="1024" height="1024" alt="画画的人" data-i18n-alt="frontFigure" />
+            <p class="split-copy split-front" data-i18n="frontCopy">画笔轻落纸上，
+颜色与形状，是眼睛最先遇见的世界</p>
+          </div>
+          <div class="split split-left">
+            <p class="or-label or-front">FRONT</p>
+            <img class="camp-figure camp-figure-left" src="assets/backend-blocks.png" width="1024" height="1024" alt="垒方块的人" data-i18n-alt="backFigure" />
+            <p class="split-copy split-back" data-i18n="backCopy">积木一块块相叠，
+看不见的骨架撑起整座城堡</p>
+            <div class="split-band" aria-hidden="true">
+              <div class="split-band-track"></div>
+            </div>
+          </div>
+          <p class="or-choice">OR</p>
+        </div>
+      </section>
+      <div class="figures-runway" aria-hidden="true"></div>
+
+      <section id="choice" class="chapter">
+        <p class="kicker" data-i18n="choiceKicker">选择</p>
+        <h2 class="chapter-title" data-i18n-html="choiceTitle">前端还是后端？</h2>
+        <div class="chapter-copy" data-i18n-html="choiceBody">
+          <p>多数人会选择一侧专精。</p>
+        </div>
+      </section>
+
+      <section id="front" class="chapter">
+        <p class="kicker" data-i18n="frontKicker">前端</p>
+        <h2 class="chapter-title" data-i18n="frontTitle">前端是先被看见的这一面。</h2>
+        <ul class="stack" aria-label="这一页的前端" data-i18n-aria="frontList">
+          <li>HTML</li>
+          <li>CSS</li>
+          <li>GSAP</li>
+          <li>ScrollTrigger</li>
+          <li>SplitText</li>
+        </ul>
+        <div class="chapter-copy" data-i18n-html="frontBody">
+          <p>别人打开这一页，先碰到前端。</p>
+          <p>结构是 HTML。样子是 CSS，黑灰的色块一块一块落在这里。</p>
+          <p>GSAP 让这一页动起来。ScrollTrigger 跟着滚动，把下一屏接上来。SplitText 把标题拆开，再让字归位。</p>
+        </div>
+      </section>
+
+      <section id="back" class="chapter">
+        <p class="kicker" data-i18n="backKicker">后端</p>
+        <h2 class="chapter-title" data-i18n="backTitle">后端是后面那一套。</h2>
+        <ul class="stack" aria-label="后端" data-i18n-aria="backList">
+          <li>Java</li>
+          <li>Python</li>
+          <li>C++</li>
+          <li>SQL</li>
+          <li>Web</li>
+        </ul>
+        <div class="chapter-copy" data-i18n-html="backBody">
+          <p>看见的后面，留着另一套。</p>
+          <p>Java、Python、C++、SQL 和 Web。</p>
+          <p>它们不先站到字面上。后端就是这些。</p>
+        </div>
+      </section>
+
+      <section id="both" class="chapter">
+        <p class="kicker" data-i18n="bothKicker">本人</p>
+        <h2 class="chapter-title" data-i18n="bothTitle">朱睿哲两边都做。</h2>
+        <div class="chapter-copy" data-i18n-html="bothBody">
+          <p>我是朱睿哲，也叫 DDjuice。现居中国大陆。一个两边都做的个人开发者，前端和后端都做。</p>
+          <p>课业和自己想做的东西，都在同一台笔记本上。喜欢用 Cursor 把它们做出来。</p>
+          <p>九点睡觉，冷水浴，读书。2023–2027，在山东师范大学读计算机科学与技术。</p>
+          <p>偶像是 Elon Musk。梦想是去火星。毕业后计划去日本读修士，目前正在准备。</p>
+        </div>
+      </section>
+
+      <section id="contact" class="chapter">
+        <p class="kicker" data-i18n="contactKicker">联系</p>
+        <h2 class="chapter-title" data-i18n="contactTitle">想一起做事，或只是打个招呼，都可以写信给我。</h2>
+        <ul class="links">
+          <li><a href="mailto:ddjuice2004@gmail.com">ddjuice2004@gmail.com</a></li>
+          <li><a href="https://github.com/DDjuicee" target="_blank" rel="noreferrer">GitHub</a></li>
+        </ul>
+        <footer inert data-gate-inert>
+          <p data-i18n-html="footer">DDjuice · 朱睿哲 · 本地个人页</p>
+          <p class="beian">
+            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">鲁ICP备2026064080号-1</a>
+          </p>
+        </footer>
+      </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/SplitText.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/CustomEase.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
