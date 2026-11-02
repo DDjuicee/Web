@@ -561,7 +561,8 @@ function placeLabels() {
     const lineAt = (y) => geo.cx + ((y - geo.cy) / geo.sin) * geo.cos;
     const bandH = band.offsetHeight || 24;
     const top = headerH + 6;
-    const room = Math.max(72, lineAt(top + 18) - bandH - 18);
+    const atLabel = lineAt(top + 18);
+    const room = Math.max(48, Math.min(atLabel - bandH - 18, width - atLabel - 18));
     let size = 16;
     for (let px = 16; px <= 40; px += 1) {
       front.style.fontSize = px + "px";
@@ -575,12 +576,12 @@ function placeLabels() {
     front.style.fontSize = size + "px";
     back.style.fontSize = size + "px";
     choice.style.fontSize = Math.round(Math.max(18, size * 0.62)) + "px";
-    const line = lineAt(top + front.offsetHeight / 2);
-    const frontRight = line - bandH - 6;
-    front.style.left = "auto";
-    front.style.right = (width - frontRight) + "px";
-    back.style.right = "auto";
-    back.style.left = (line + 8) + "px";
+    const line = lineAt(top + back.offsetHeight / 2);
+    const backRight = line - bandH - 6;
+    back.style.left = "auto";
+    back.style.right = (width - backRight) + "px";
+    front.style.right = "auto";
+    front.style.left = (line + 8) + "px";
     front.style.top = top + "px";
     back.style.top = top + "px";
     front.style.translate = "0 0";
@@ -615,10 +616,17 @@ function placeLabels() {
   back.style.fontSize = size + "px";
   choice.style.fontSize = Math.round(Math.max(52, size * 0.4)) + "px";
   const edge = Math.max(bandClear, choice.offsetWidth / 2 + 36);
-  front.style.left = "auto";
-  front.style.right = (cx + edge) + "px";
-  back.style.right = "auto";
-  back.style.left = (cx + edge) + "px";
+  const margin = 12;
+  back.style.left = "auto";
+  back.style.right = (cx + edge) + "px";
+  front.style.right = "auto";
+  front.style.left = (cx + edge) + "px";
+  while (size > 48 && (back.offsetWidth > cx - edge - margin || front.offsetWidth > width - (cx + edge) - margin)) {
+    size -= 2;
+    front.style.fontSize = size + "px";
+    back.style.fontSize = size + "px";
+    choice.style.fontSize = Math.round(Math.max(52, size * 0.4)) + "px";
+  }
   front.style.top = "";
   back.style.top = "";
   // GSAP already centers these with translate3d(0, -50%, 0). Clearing the
