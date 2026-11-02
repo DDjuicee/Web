@@ -248,7 +248,7 @@ function applyLang(lang) {
       ScrollTrigger.refresh();
     }
   }
-  layoutBand();
+  layoutBand(false);
   syncNav();
 }
 
@@ -464,7 +464,49 @@ function buildBand() {
   }
 }
 
-function layoutBand() {
+let labelGeometry = null;
+
+function labelViewportKey() {
+  return window.innerWidth + "x" + window.innerHeight;
+}
+
+function rememberLabels(front, back, choice) {
+  const snap = (node) => ({
+    fontSize: node.style.fontSize,
+    left: node.style.left,
+    right: node.style.right,
+    top: node.style.top,
+    translate: node.style.translate,
+    transform: node.style.transform
+  });
+  labelGeometry = {
+    key: labelViewportKey(),
+    front: snap(front),
+    back: snap(back),
+    choice: snap(choice)
+  };
+}
+
+function restoreLabels(front, back, choice) {
+  const apply = (node, saved, lockTranslate) => {
+    node.style.fontSize = saved.fontSize;
+    node.style.left = saved.left;
+    node.style.right = saved.right;
+    node.style.top = saved.top;
+    if (lockTranslate) {
+      // Keep GSAP's scroll transform. Only the centering translate is re-locked.
+      node.style.translate = node.style.transform ? "none" : saved.translate;
+      return;
+    }
+    node.style.translate = saved.translate;
+    node.style.transform = saved.transform;
+  };
+  apply(front, labelGeometry.front, true);
+  apply(back, labelGeometry.back, true);
+  apply(choice, labelGeometry.choice, false);
+}
+
+function layoutBand(measureLabels) {
   const figures = document.querySelector(".figures");
   if (!figures) {
     return;
@@ -477,7 +519,20 @@ function layoutBand() {
   }
 
   applyTurn(turnFromProgress(openingTrigger ? openingTrigger.progress : splitTurn));
-  placeLabels();
+  const front = figures.querySelector(".or-front");
+  const back = figures.querySelector(".or-back");
+  const choice = figures.querySelector(".or-choice");
+  const frozen = measureLabels === false
+    && labelGeometry
+    && labelGeometry.key === labelViewportKey()
+    && front
+    && back
+    && choice;
+  if (frozen) {
+    restoreLabels(front, back, choice);
+  } else {
+    placeLabels();
+  }
   placeCopy();
 }
 
@@ -538,6 +593,7 @@ function placeLabels() {
     choice.style.left = orLeft + "px";
     choice.style.top = orTop + "px";
     choice.style.transform = "none";
+    rememberLabels(front, back, choice);
     return;
   }
 
@@ -572,6 +628,7 @@ function placeLabels() {
   choice.style.left = "";
   choice.style.top = "";
   choice.style.transform = "";
+  rememberLabels(front, back, choice);
 }
 
 function useChineseCopy(front, back) {

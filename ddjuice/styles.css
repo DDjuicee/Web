@@ -237,12 +237,13 @@ body.has-figures .figures {
 .or-choice {
   margin: 0;
   color: #f4f4f4;
-  font-family: var(--sans);
+  font-family: "Archivo", sans-serif;
   font-weight: 760;
   font-stretch: 125%;
   font-variation-settings: "wdth" 125, "wght" 760;
   line-height: 0.78;
   letter-spacing: -0.055em;
+  text-autospace: no-autospace;
   white-space: nowrap;
   text-transform: uppercase;
   pointer-events: none;
