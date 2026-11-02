@@ -473,6 +473,7 @@ function labelViewportKey() {
 function rememberLabels(front, back, choice) {
   const snap = (node) => ({
     fontSize: node.style.fontSize,
+    width: node.style.width,
     left: node.style.left,
     right: node.style.right,
     top: node.style.top,
@@ -490,6 +491,7 @@ function rememberLabels(front, back, choice) {
 function restoreLabels(front, back, choice) {
   const apply = (node, saved, lockTranslate) => {
     node.style.fontSize = saved.fontSize;
+    node.style.width = saved.width;
     node.style.left = saved.left;
     node.style.right = saved.right;
     node.style.top = saved.top;
@@ -536,6 +538,14 @@ function layoutBand(measureLabels) {
   placeCopy();
 }
 
+function lockupFontSize(width, height) {
+  const root = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  if (width < 700) {
+    return Math.max(15, width * 0.046);
+  }
+  return Math.min(root * 3.6, Math.max(root, width * 0.031));
+}
+
 function placeLabels() {
   const figures = document.querySelector(".figures");
   const front = figures && figures.querySelector(".or-front");
@@ -547,95 +557,150 @@ function placeLabels() {
   }
 
   const width = figures.clientWidth;
+  const height = figures.clientHeight || window.innerHeight;
   const cx = width / 2;
-  if (!width || !cx) {
+  if (!width || !height || !cx) {
     return;
   }
 
   const narrow = width < 700;
   const header = document.querySelector(".top");
   const headerH = header ? header.offsetHeight : 64;
-  if (narrow) {
-    const height = figures.clientHeight || window.innerHeight;
+  const bandH = band.offsetHeight || (narrow ? 25 : 46);
+  const margin = narrow ? 8 : 12;
+  let size = lockupFontSize(width, height);
+  const minSize = narrow ? 12 : 15;
+
+  const textBox = (node) => {
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    return range.getBoundingClientRect();
+  };
+  const hostOf = () => figures.getBoundingClientRect();
+
+  const applySize = (px) => {
+    front.style.width = "auto";
+    back.style.width = "auto";
+    choice.style.width = "";
+    front.style.fontSize = px + "px";
+    back.style.fontSize = px + "px";
+    choice.style.fontSize = (px * 0.7) + "px";
+    const column = Math.max(front.offsetWidth, back.offsetWidth);
+    front.style.width = column + "px";
+    back.style.width = column + "px";
+    return column;
+  };
+
+  let placed = false;
+  for (let guard = 0; guard < 60; guard += 1) {
+    const column = applySize(size);
+    const hexW = choice.offsetWidth;
+    const hexH = choice.offsetHeight;
+    const hexFont = parseFloat(choice.style.fontSize) || size * 0.7;
+    const overlap = hexFont * 1.3;
+    const rowH = Math.max(front.offsetHeight, back.offsetHeight);
     const geo = bandGeometry(width, height, 0);
-    const lineAt = (y) => geo.cx + ((y - geo.cy) / geo.sin) * geo.cos;
-    const bandH = band.offsetHeight || 24;
-    const top = headerH + 6;
-    const atLabel = lineAt(top + 18);
-    const room = Math.max(48, Math.min(atLabel - bandH - 18, width - atLabel - 18));
-    let size = 16;
-    for (let px = 16; px <= 40; px += 1) {
-      front.style.fontSize = px + "px";
-      back.style.fontSize = px + "px";
-      choice.style.fontSize = Math.round(Math.max(18, px * 0.62)) + "px";
-      if (Math.max(front.offsetWidth, back.offsetWidth) > room) {
-        break;
-      }
-      size = px;
+    const lineAt = (y) => geo.cx + ((y - geo.cy) * geo.cos) / geo.sin;
+
+    let top;
+    let hexCx;
+    let hexCy;
+    if (narrow) {
+      const extra = Math.max(0, (hexH - rowH) / 2);
+      top = headerH + 6 + extra;
+      const mid = top + rowH / 2;
+      hexCy = mid;
+      hexCx = geo.cx + (14 + (mid - geo.cy) * geo.cos + (hexH / 2) * geo.cos) / geo.sin + hexW / 2;
+      hexCx = Math.max(margin + hexW / 2, Math.min(width - margin - hexW / 2, hexCx));
+    } else {
+      top = "";
+      hexCx = cx;
+      hexCy = height / 2;
     }
-    front.style.fontSize = size + "px";
-    back.style.fontSize = size + "px";
-    choice.style.fontSize = Math.round(Math.max(18, size * 0.62)) + "px";
-    const line = lineAt(top + back.offsetHeight / 2);
-    const backRight = line - bandH - 6;
+
+    const sampleTop = narrow ? top : height / 2 - rowH / 2;
+    const ys = [sampleTop, sampleTop + rowH / 2, sampleTop + rowH];
+    let lineMin = Infinity;
+    let lineMax = -Infinity;
+    ys.forEach((y) => {
+      const line = lineAt(y);
+      lineMin = Math.min(lineMin, line);
+      lineMax = Math.max(lineMax, line);
+    });
+
+    let frontLeft = hexCx + hexW / 2 - overlap;
+    let backRight = hexCx - hexW / 2 + overlap;
+    frontLeft = Math.max(frontLeft, lineMax + 1);
+    backRight = Math.min(backRight, lineMin - 1);
+
     back.style.left = "auto";
     back.style.right = (width - backRight) + "px";
     front.style.right = "auto";
-    front.style.left = (line + 8) + "px";
-    front.style.top = top + "px";
-    back.style.top = top + "px";
-    front.style.translate = "0 0";
-    back.style.translate = "0 0";
-    const ow = choice.offsetWidth;
-    const oh = choice.offsetHeight;
-    const shift = 14 + (ow / 2) * geo.sin + (oh / 2) * geo.cos;
-    const orLeft = Math.max(8, Math.min(width - ow - 8, geo.cx + shift * geo.sin - ow / 2));
-    const orTop = Math.max(headerH + 8, Math.min(height - oh - 8, geo.cy - shift * geo.cos - oh / 2));
-    choice.style.left = orLeft + "px";
-    choice.style.top = orTop + "px";
-    choice.style.transform = "none";
-    rememberLabels(front, back, choice);
-    return;
-  }
+    front.style.left = frontLeft + "px";
+    if (narrow) {
+      front.style.top = top + "px";
+      back.style.top = top + "px";
+      front.style.translate = "0 0";
+      back.style.translate = "0 0";
+      choice.style.left = (hexCx - hexW / 2) + "px";
+      choice.style.top = (hexCy - hexH / 2) + "px";
+      choice.style.transform = "none";
+    } else {
+      front.style.top = "";
+      back.style.top = "";
+      front.style.translate = front.style.transform ? "none" : "";
+      back.style.translate = back.style.transform ? "none" : "";
+      choice.style.left = "";
+      choice.style.top = "";
+      choice.style.transform = "";
+    }
 
-  let size = 48;
-  const bandClear = (band.offsetHeight || 46) + 16;
-  for (let px = 48; px <= 240; px += 2) {
-    front.style.fontSize = px + "px";
-    back.style.fontSize = px + "px";
-    choice.style.fontSize = Math.round(Math.max(52, px * 0.4)) + "px";
-    const edge = Math.max(bandClear, choice.offsetWidth / 2 + 36);
-    const maxW = cx - edge - 12;
-    if (Math.max(front.offsetWidth, back.offsetWidth) > maxW) {
+    const host = hostOf();
+    const frontInk = textBox(front);
+    const backInk = textBox(back);
+    const choiceBox = choice.getBoundingClientRect();
+    const local = (box) => ({
+      left: box.left - host.left,
+      right: box.right - host.left,
+      top: box.top - host.top,
+      bottom: box.bottom - host.top,
+      width: box.width
+    });
+    const frontLocal = local(frontInk);
+    const backLocal = local(backInk);
+    const choiceLocal = local(choiceBox);
+    const boxes = [frontLocal, backLocal, choiceLocal];
+    const inside = boxes.every((box) => {
+      return box.width > 0
+        && box.left >= margin - 0.5
+        && box.right <= width - margin + 0.5
+        && box.top >= (narrow ? 2 : margin) - 0.5
+        && box.bottom <= height - margin + 0.5;
+    });
+    const signedAt = (x, y) => (x - geo.cx) * geo.sin - (y - geo.cy) * geo.cos;
+    const corners = (box) => [
+      [box.left, box.top],
+      [box.right, box.top],
+      [box.left, box.bottom],
+      [box.right, box.bottom]
+    ];
+    const frontClear = corners(frontLocal).every(([x, y]) => signedAt(x, y) >= 0.5);
+    const backClear = corners(backLocal).every(([x, y]) => signedAt(x, y) <= -0.5);
+    const separated = backInk.right <= frontInk.left - 4 && backRight <= frontLeft + overlap;
+    const fitsWidth = frontLeft >= margin && backRight - column >= margin && frontLeft + column <= width - margin;
+    if (inside && frontClear && backClear && separated && fitsWidth) {
+      placed = true;
       break;
     }
-    size = px;
+    if (size <= minSize) {
+      break;
+    }
+    size = Math.max(minSize, size - (narrow ? 0.5 : 1));
   }
 
-  front.style.fontSize = size + "px";
-  back.style.fontSize = size + "px";
-  choice.style.fontSize = Math.round(Math.max(52, size * 0.4)) + "px";
-  const edge = Math.max(bandClear, choice.offsetWidth / 2 + 36);
-  const margin = 12;
-  back.style.left = "auto";
-  back.style.right = (cx + edge) + "px";
-  front.style.right = "auto";
-  front.style.left = (cx + edge) + "px";
-  while (size > 48 && (back.offsetWidth > cx - edge - margin || front.offsetWidth > width - (cx + edge) - margin)) {
-    size -= 2;
-    front.style.fontSize = size + "px";
-    back.style.fontSize = size + "px";
-    choice.style.fontSize = Math.round(Math.max(52, size * 0.4)) + "px";
+  if (!placed && size > minSize) {
+    applySize(size);
   }
-  front.style.top = "";
-  back.style.top = "";
-  // GSAP already centers these with translate3d(0, -50%, 0). Clearing the
-  // inline translate lets the stylesheet's translate stack on top of that.
-  front.style.translate = front.style.transform ? "none" : "";
-  back.style.translate = back.style.transform ? "none" : "";
-  choice.style.left = "";
-  choice.style.top = "";
-  choice.style.transform = "";
   rememberLabels(front, back, choice);
 }
 

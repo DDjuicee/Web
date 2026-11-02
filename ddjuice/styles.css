@@ -236,13 +236,7 @@ body.has-figures .figures {
 .or-label,
 .or-choice {
   margin: 0;
-  color: #f4f4f4;
   font-family: "Archivo", sans-serif;
-  font-weight: 760;
-  font-stretch: 125%;
-  font-variation-settings: "wdth" 125, "wght" 760;
-  line-height: 0.78;
-  letter-spacing: -0.055em;
   text-autospace: no-autospace;
   white-space: nowrap;
   text-transform: uppercase;
@@ -251,9 +245,33 @@ body.has-figures .figures {
 
 .or-label {
   position: absolute;
-  z-index: 0;
+  z-index: 2;
   top: 50%;
   translate: 0 -50%;
+  padding: 0.36em 1.7em;
+  font-weight: 860;
+  font-stretch: 125%;
+  font-variation-settings: "wdth" 125, "wght" 860;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.or-back {
+  padding-left: 1.7em;
+  padding-right: 1.5em;
+  border-radius: 100px 0 0 100px;
+  background: #1c222c;
+  color: #ffb547;
+  text-align: right;
+}
+
+.or-front {
+  padding-left: 1.5em;
+  padding-right: 1.7em;
+  border-radius: 0 100px 100px 0;
+  background: #ded8cc;
+  color: #ea1d0f;
+  text-align: left;
 }
 
 .or-choice {
@@ -261,9 +279,21 @@ body.has-figures .figures {
   z-index: 5;
   left: 50%;
   top: 50%;
+  display: grid;
+  place-items: center;
+  width: 2.7em;
+  aspect-ratio: 1 / 1.1;
+  padding: 0;
   transform: translate(-50%, -50%);
-  padding: 0.04em 0.14em 0.08em;
-  background: #000;
+  font-weight: 300;
+  font-stretch: 100%;
+  font-variation-settings: "wdth" 100, "wght" 300;
+  font-size: 0.7em;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #f4f1ea;
+  background: #ea1d0f;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
 }
 
 .camp-figure-left {
