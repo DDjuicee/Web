@@ -637,6 +637,7 @@ body.gate-open {
   border-radius: 1px;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.22);
+  pointer-events: none;
   animation: gate-hide 0.4s ease 3.4s forwards;
 }
 
@@ -667,6 +668,10 @@ body.gate-open {
   opacity: 0;
   pointer-events: none;
   animation: gate-show 0.55s ease 3.6s both, gate-hit 0s linear 3.6s forwards;
+}
+
+.gate-enter.is-ready {
+  pointer-events: auto;
 }
 
 .gate-enter:hover {

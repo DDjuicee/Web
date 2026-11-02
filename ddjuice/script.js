@@ -879,14 +879,22 @@ function handoffSections() {
   });
 }
 
+function prepareMotion() {
+  if (!canAnimate() || prepareMotion.ready) {
+    return;
+  }
+  prepareMotion.ready = true;
+  gsap.registerPlugin(ScrollTrigger, SplitText, CustomEase);
+  CustomEase.create("hood", "0.22, 1, 0.36, 1");
+  CustomEase.create("wipe", "0.77, 0, 0.18, 1");
+}
+
 function initMotion() {
   if (!canAnimate()) {
     return;
   }
 
-  gsap.registerPlugin(ScrollTrigger, SplitText, CustomEase);
-  CustomEase.create("hood", "0.22, 1, 0.36, 1");
-  CustomEase.create("wipe", "0.77, 0, 0.18, 1");
+  prepareMotion();
 
   for (const line of document.querySelectorAll(".gate-slogan .line")) {
     SplitText.create(line, {
@@ -896,7 +904,6 @@ function initMotion() {
       charsClass: "char",
       aria: "auto",
       onSplit(self) {
-        fitSlogan();
         return gsap.from(self.chars, {
           yPercent: 40,
           opacity: 0,
@@ -908,11 +915,13 @@ function initMotion() {
     });
   }
 
-  wrapFrames();
-  openFigures();
-  handoffSections();
-  splitTitles();
-  revealCopy();
+  window.setTimeout(() => {
+    wrapFrames();
+    openFigures();
+    handoffSections();
+    splitTitles();
+    revealCopy();
+  }, 0);
 }
 
 function begin() {
@@ -1023,20 +1032,6 @@ for (const button of document.querySelectorAll(".langs button")) {
   });
 }
 
-applyLang(detectLang());
-
-if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(begin);
-} else {
-  begin();
-}
-
-window.addEventListener("resize", () => {
-  cachedTops = null;
-  layoutBand();
-  fitSlogan();
-});
-
 const gate = document.querySelector(".gate");
 const gateEnter = document.querySelector(".gate-enter");
 const gateFill = document.querySelector(".gate-progress-fill");
@@ -1063,25 +1058,62 @@ function revealSite() {
   };
 
   if (canAnimate()) {
+    prepareMotion();
     gsap.to(gate, {
       clipPath: "inset(0% 0% 0% 100%)",
       duration: 0.72,
       ease: "wipe",
       onComplete: removeGate
     });
+    window.setTimeout(removeGate, 1000);
   } else {
     removeGate();
   }
 }
 
+function enableEnter() {
+  if (!gateEnter || gateEnter.classList.contains("is-ready")) {
+    return;
+  }
+  gateEnter.classList.add("is-ready");
+  gateEnter.style.pointerEvents = "auto";
+}
+
 if (gate && gateEnter) {
   gateEnter.addEventListener("click", revealSite);
-
   if (reducedMotion) {
+    enableEnter();
     gateEnter.focus();
-  } else if (gateFill) {
-    gateFill.addEventListener("animationend", () => {
-      gateEnter.focus();
-    });
+  } else {
+    window.setTimeout(enableEnter, 3600);
+    if (gateFill) {
+      gateFill.addEventListener("animationend", () => {
+        enableEnter();
+        gateEnter.focus();
+      });
+    }
   }
 }
+
+applyLang(detectLang());
+
+function startEntrance() {
+  if (startEntrance.done) {
+    return;
+  }
+  startEntrance.done = true;
+  begin();
+}
+
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(startEntrance);
+  window.setTimeout(startEntrance, 900);
+} else {
+  startEntrance();
+}
+
+window.addEventListener("resize", () => {
+  cachedTops = null;
+  layoutBand();
+  fitSlogan();
+});
