@@ -260,8 +260,8 @@ body.has-figures .figures {
   padding-left: 1.7em;
   padding-right: 1.5em;
   border-radius: 100px 0 0 100px;
-  background: #1c222c;
-  color: #ffb547;
+  background: #191919;
+  color: #f1f1f1;
   text-align: right;
 }
 
@@ -269,8 +269,8 @@ body.has-figures .figures {
   padding-left: 1.5em;
   padding-right: 1.7em;
   border-radius: 0 100px 100px 0;
-  background: #ded8cc;
-  color: #ea1d0f;
+  background: #dcdcdc;
+  color: #111111;
   text-align: left;
 }
 
@@ -291,8 +291,8 @@ body.has-figures .figures {
   font-size: 0.7em;
   line-height: 1;
   letter-spacing: 0.02em;
-  color: #f4f1ea;
-  background: #ea1d0f;
+  color: #0c0c0c;
+  background: #8d8d8d;
   clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
 }
 
@@ -416,9 +416,12 @@ body.is-splitting #choice {
 }
 
 #choice,
-#front,
 #contact {
   background: var(--block);
+}
+
+#front {
+  background: #333333;
 }
 
 #back {
