@@ -223,6 +223,19 @@ nav a[aria-current="true"] {
 
 .line { display: block; }
 
+.word,
+.char,
+.title-char {
+  display: inline-block;
+}
+
+.title-line {
+  display: block;
+  width: 100%;
+  overflow: visible;
+  white-space: normal;
+}
+
 .cta {
   display: flex;
   flex-wrap: wrap;
@@ -669,12 +682,10 @@ rt {
   justify-content: center;
   padding: 32px 20px 40px;
   background: var(--bg);
+  clip-path: inset(0% 0% 0% 0%);
 }
 
-.gate.is-leaving {
-  opacity: 0;
-  pointer-events: none;
-}
+.gate.is-leaving { pointer-events: none; }
 
 .gate-slogan {
   margin: 0;
@@ -707,30 +718,17 @@ rt {
 body.gate-open { overflow: hidden; }
 
 @media (prefers-reduced-motion: no-preference) {
-  html { scroll-behavior: smooth; }
-
   .sheet,
   .btn,
   nav a,
   .langs button,
   .links a,
-  .gate,
   .beian a {
-    transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease, transform 0.18s ease, opacity 0.35s ease;
-  }
-
-  .spread .figure,
-  .lockup {
-    animation: rise 0.5s ease both;
+    transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
   }
 }
 
 .sheet:hover { transform: translateY(-2px); }
-
-@keyframes rise {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .sheet:hover { transform: none; }

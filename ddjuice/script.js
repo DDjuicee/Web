@@ -218,10 +218,255 @@ function detectLang() {
   return "zh-CN";
 }
 
+let motionReady = false;
+let titleSplits = [];
+let copyTweens = [];
+let figureTween = null;
+
+function canAnimate() {
+  return Boolean(window.gsap && window.ScrollTrigger && window.SplitText && window.CustomEase && !reducedMotion);
+}
+
+function belowFold(node) {
+  return node.getBoundingClientRect().top > window.innerHeight * 0.88;
+}
+
+function prepareMotion() {
+  if (!canAnimate() || prepareMotion.ready) {
+    return;
+  }
+  prepareMotion.ready = true;
+  gsap.registerPlugin(ScrollTrigger, SplitText, CustomEase);
+  CustomEase.create("hood", "0.22, 1, 0.36, 1");
+  CustomEase.create("wipe", "0.77, 0, 0.18, 1");
+}
+
+function clearTextMotion() {
+  for (const split of titleSplits) {
+    if (split && split.revert) {
+      split.revert();
+    }
+  }
+  titleSplits = [];
+  for (const tween of copyTweens) {
+    if (tween.scrollTrigger) {
+      tween.scrollTrigger.kill();
+    }
+    tween.kill();
+  }
+  copyTweens = [];
+  if (window.gsap) {
+    gsap.set(".band .cn-title, .note-title, .band .kicker, .band .prose p, .band .stack li, .band .links a, .desk", {
+      clearProps: "opacity,transform,filter,visibility"
+    });
+  }
+}
+
+function splitTitles() {
+  if (!canAnimate()) {
+    return;
+  }
+
+  for (const title of document.querySelectorAll(".band .cn-title, .note-title")) {
+    if (!belowFold(title)) {
+      continue;
+    }
+    const section = title.closest("section") || title;
+    try {
+      titleSplits.push(SplitText.create(title, {
+        type: "lines,words,chars",
+        tag: "span",
+        linesClass: "title-line",
+        wordsClass: "title-word",
+        charsClass: "title-char",
+        aria: "auto",
+        onSplit(self) {
+          for (const line of self.lines) {
+            line.style.whiteSpace = "normal";
+            line.style.overflow = "visible";
+            line.style.width = "100%";
+          }
+          return gsap.from(self.chars, {
+            yPercent: 110,
+            opacity: 0,
+            stagger: 0.035,
+            ease: "none",
+            scrollTrigger: {
+              trigger: section,
+              start: "top bottom",
+              end: "top 62%",
+              scrub: true
+            }
+          });
+        }
+      }));
+    } catch (error) {
+      /* leave the heading as written */
+    }
+  }
+}
+
+function revealCopy() {
+  if (!canAnimate()) {
+    return;
+  }
+
+  for (const section of document.querySelectorAll(".band")) {
+    const bits = [...section.querySelectorAll(".kicker, .desk, .prose p, .stack li, .links a")].filter(belowFold);
+    if (!bits.length) {
+      continue;
+    }
+    copyTweens.push(gsap.fromTo(bits, {
+      y: 36,
+      opacity: 0
+    }, {
+      y: 0,
+      opacity: 1,
+      stagger: 0.04,
+      ease: "none",
+      scrollTrigger: {
+        trigger: section,
+        start: "top bottom",
+        end: "top 58%",
+        scrub: true
+      }
+    }));
+  }
+}
+
+function handoffSections() {
+  const bands = [...document.querySelectorAll(".band")];
+  bands.forEach((band, index) => {
+    const next = bands[index + 1];
+    if (!next) {
+      return;
+    }
+    gsap.to(band, {
+      y: -32,
+      opacity: 0.62,
+      ease: "none",
+      scrollTrigger: {
+        trigger: next,
+        start: "top 65%",
+        end: "top 20%",
+        scrub: true
+      }
+    });
+  });
+}
+
+function openFigures() {
+  const spread = document.querySelector(".spread");
+  const back = spread && spread.querySelector(".pane-back");
+  const front = spread && spread.querySelector(".pane-front");
+  const lockup = spread && spread.querySelector(".lockup");
+  const seam = spread && spread.querySelector(".seam");
+  if (!spread || !back || !front || !lockup || figureTween) {
+    return;
+  }
+
+  // The old page flew the halves off a full-screen stage. This spread is a
+  // frame, so the same split stops while both figures are still in it.
+  const distance = () => Math.round(spread.clientWidth * 0.18);
+  const lift = () => -Math.round(spread.clientHeight * 0.28);
+
+  figureTween = gsap.timeline({
+    defaults: { ease: "none" },
+    scrollTrigger: {
+      trigger: spread,
+      start: "top 18%",
+      end: "bottom 18%",
+      scrub: 0.45,
+      invalidateOnRefresh: true
+    }
+  })
+    .fromTo(lockup, {
+      y: 0,
+      filter: "blur(0px)",
+      opacity: 1
+    }, {
+      y: lift,
+      filter: "blur(22px)",
+      opacity: 0,
+      duration: 0.32,
+      immediateRender: false
+    }, 0.12)
+    .fromTo(seam, { opacity: 1 }, {
+      opacity: 0,
+      duration: 0.24,
+      immediateRender: false
+    }, 0.2)
+    .fromTo(back, { x: 0 }, {
+      x: () => -distance(),
+      duration: 0.55,
+      immediateRender: false
+    }, 0.12)
+    .fromTo(front, { x: 0 }, {
+      x: () => distance(),
+      duration: 0.55,
+      immediateRender: false
+    }, 0.12);
+}
+
+function splitGate() {
+  for (const line of document.querySelectorAll(".gate-slogan .line")) {
+    try {
+    SplitText.create(line, {
+      type: "words,chars",
+      tag: "span",
+      wordsClass: "word",
+      charsClass: "char",
+      aria: "auto",
+      onSplit(self) {
+        return gsap.from(self.chars, {
+          yPercent: 40,
+          opacity: 0,
+          duration: 0.6,
+          stagger: 0.018,
+          ease: "hood"
+        });
+      }
+    });
+    } catch (error) {
+      /* the slogan still reads as written */
+    }
+  }
+}
+
+function initMotion() {
+  if (!canAnimate() || initMotion.ready) {
+    return;
+  }
+  initMotion.ready = true;
+  prepareMotion();
+  splitGate();
+  openFigures();
+  handoffSections();
+  splitTitles();
+  revealCopy();
+  motionReady = true;
+}
+
+function rebuildTextMotion() {
+  if (!canAnimate()) {
+    return;
+  }
+  prepareMotion();
+  splitTitles();
+  revealCopy();
+  if (window.ScrollTrigger) {
+    ScrollTrigger.refresh();
+  }
+}
+
 function applyLang(lang) {
   const dict = copy[lang];
   if (!dict) {
     return;
+  }
+
+  if (motionReady) {
+    clearTextMotion();
   }
 
   document.documentElement.lang = lang;
@@ -264,6 +509,10 @@ function applyLang(lang) {
     localStorage.setItem(STORAGE_KEY, lang);
   } catch (error) {
     /* keep the choice for this view */
+  }
+
+  if (motionReady) {
+    rebuildTextMotion();
   }
 
   syncNav();
@@ -331,19 +580,59 @@ function revealSite() {
     if (gate.isConnected) {
       gate.remove();
     }
+    if (window.ScrollTrigger) {
+      ScrollTrigger.refresh();
+    }
   };
 
-  if (reducedMotion) {
-    removeGate();
+  if (canAnimate()) {
+    prepareMotion();
+    gsap.to(gate, {
+      clipPath: "inset(0% 0% 0% 100%)",
+      duration: 0.72,
+      ease: "wipe",
+      onComplete: removeGate
+    });
+    window.setTimeout(removeGate, 1000);
   } else {
-    gate.addEventListener("transitionend", removeGate, { once: true });
-    window.setTimeout(removeGate, 500);
+    removeGate();
   }
 
   if (location.hash && document.querySelector(location.hash)) {
     document.querySelector(location.hash).scrollIntoView();
   }
 }
+
+function startEntrance() {
+  if (startEntrance.done) {
+    return;
+  }
+  if (!startEntrance.force && document.fonts && document.fonts.status !== "loaded") {
+    return;
+  }
+  startEntrance.done = true;
+  initMotion();
+}
+
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => {
+    startEntrance.force = true;
+    startEntrance();
+  });
+  window.setTimeout(() => {
+    startEntrance.force = true;
+    startEntrance();
+  }, 1600);
+} else {
+  startEntrance.force = true;
+  startEntrance();
+}
+
+window.addEventListener("resize", () => {
+  if (window.ScrollTrigger) {
+    ScrollTrigger.refresh();
+  }
+});
 
 for (const node of document.querySelectorAll("[data-gate-inert]")) {
   node.setAttribute("inert", "");
