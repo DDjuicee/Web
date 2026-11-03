@@ -3,115 +3,204 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0c0c0c" />
     <title>DDjuice · 朱睿哲</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body class="gate-open">
     <div class="gate" role="dialog" aria-modal="true" aria-labelledby="gate-slogan">
-      <p class="gate-slogan" id="gate-slogan">
+      <p class="gate-slogan" id="gate-slogan" lang="en">
         <span class="line">DESKTOP AND DREAMING</span>
         <span class="line">JUICE FOR FUN</span>
       </p>
-      <div class="gate-foot">
-        <div class="gate-progress" aria-hidden="true"><span class="gate-progress-fill"></span></div>
-        <button type="button" class="gate-enter">Enter</button>
-      </div>
+      <button type="button" class="gate-enter">Enter</button>
     </div>
+    <noscript>
+      <style>
+        .gate { display: none !important; }
+        body.gate-open { overflow: auto; }
+      </style>
+    </noscript>
 
-    <header class="top" id="top" inert data-gate-inert>
+    <header class="top" id="top" data-gate-inert>
       <a class="mark" href="#top">DDjuice</a>
-      <div class="top-right">
-        <nav aria-label="Sections">
-          <a href="#camps" data-i18n="navCamps">两端</a>
-          <a href="#front" data-i18n="navFront">前端</a>
-          <a href="#back" data-i18n="navBack">后端</a>
-          <a href="#both" data-i18n="navBoth">本人</a>
-          <a href="#contact" data-i18n="navContact">联系</a>
-        </nav>
-        <div class="langs" role="group" aria-label="选择语言" data-i18n-aria="langGroup">
-          <button type="button" data-lang="zh-CN" aria-pressed="true">简体</button>
-          <button type="button" data-lang="zh-TW">繁体</button>
-          <button type="button" data-lang="en">English</button>
-          <button type="button" data-lang="ja">日本語</button>
-        </div>
-      </div>
+      <nav aria-label="Sections">
+        <a href="#work" data-i18n="navWork">作品</a>
+        <a href="#both" data-i18n="navBoth">本人</a>
+        <a href="#contact" data-i18n="navContact">联系</a>
+      </nav>
     </header>
 
-    <main inert data-gate-inert>
-      <section id="camps" class="chapter">
-        <p class="kicker" data-i18n="campsKicker">两端</p>
-        <h1 class="chapter-title" data-i18n-html="campsTitle">前端与后端，<br>是技术上的<span class="keep">两个阵营</span>。</h1>
-        <div class="chapter-copy" data-i18n-html="campsBody">
-          <p>从事技术的人，通常归入前端或后端。</p>
-          <p>多数人选定其中一边，并以这一边作为专长。</p>
-        </div>
-        <div class="figures">
-          <div class="split split-right">
-            <p class="or-label or-front" lang="en">FRONT</p>
-            <img class="camp-figure camp-figure-right" src="assets/frontend-doodle.png" width="1024" height="1024" alt="画画的人" data-i18n-alt="frontFigure" />
-            <p class="split-copy split-front" data-i18n="frontCopy">画笔轻落纸上，
-颜色与形状，是眼睛最先遇见的世界</p>
+    <main data-gate-inert>
+      <section class="hero" id="camps">
+        <div class="hero-copy">
+          <p class="kicker" data-i18n="campsKicker">两端</p>
+          <h1 class="name" data-i18n-html="heroName">朱睿哲</h1>
+          <p class="aka" lang="en">DDjuice</p>
+          <p class="lead" data-i18n-html="heroLead">我是朱睿哲，也叫 DDjuice。现居中国大陆。一个两边都做的个人开发者，前端和后端都做。2023–2027，在山东师范大学读计算机科学与技术。</p>
+          <p class="slogan" lang="en">
+            <span class="line">DESKTOP AND DREAMING</span>
+            <span class="line">JUICE FOR FUN</span>
+          </p>
+          <div class="cta">
+            <a class="btn btn-fill" href="#work" data-i18n="navWork">作品</a>
+            <a class="btn" href="#contact" data-i18n="navContact">联系</a>
           </div>
-          <div class="split split-left">
-            <p class="or-label or-back" lang="en">BACK</p>
-            <img class="camp-figure camp-figure-left" src="assets/backend-blocks.png" width="1024" height="1024" alt="垒方块的人" data-i18n-alt="backFigure" />
-            <p class="split-copy split-back" data-i18n="backCopy">积木一块块相叠，
-看不见的骨架撑起整座城堡</p>
-            <div class="split-band" aria-hidden="true">
-              <div class="split-band-track"></div>
+          <div class="langs" role="group" aria-label="选择语言" data-i18n-aria="langGroup">
+            <button type="button" data-lang="zh-CN" aria-pressed="true">简体</button>
+            <button type="button" data-lang="zh-TW">繁体</button>
+            <button type="button" data-lang="en">English</button>
+            <button type="button" data-lang="ja">日本語</button>
+          </div>
+        </div>
+
+        <div class="spread-block">
+          <div class="spread">
+            <div class="pane pane-back">
+              <img class="figure figure-back" src="assets/backend-blocks.png" width="1024" height="1024" alt="垒方块的人" data-i18n-alt="backFigure" draggable="false" />
             </div>
+            <div class="pane pane-front">
+              <img class="figure figure-front" src="assets/frontend-doodle.png" width="1024" height="1024" alt="画画的人" data-i18n-alt="frontFigure" draggable="false" />
+            </div>
+            <svg class="seam" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <line x1="62" y1="0" x2="38" y2="100" stroke="#3a3a3a" stroke-width="1" vector-effect="non-scaling-stroke" />
+            </svg>
+            <p class="lockup" lang="en">
+              <span class="tag tag-back">BACK</span>
+              <span class="tag tag-or">OR</span>
+              <span class="tag tag-front">FRONT</span>
+            </p>
           </div>
-          <p class="or-choice" lang="en">OR</p>
+          <div class="captions">
+            <p class="caption caption-back">
+              <span class="cap-mark cap-mark-back" lang="en">BACK</span>
+              <span class="cap-text" data-i18n="backCopy">积木一块块相叠，
+看不见的骨架撑起整座城堡</span>
+            </p>
+            <p class="caption caption-front">
+              <span class="cap-mark cap-mark-front" lang="en">FRONT</span>
+              <span class="cap-text" data-i18n="frontCopy">画笔轻落纸上，
+颜色与形状，是眼睛最先遇见的世界</span>
+            </p>
+          </div>
         </div>
-      </section>
-      <div class="figures-runway" aria-hidden="true"></div>
 
-      <section id="choice" class="chapter">
-        <p class="kicker" data-i18n="choiceKicker">选择</p>
-        <h2 class="chapter-title" data-i18n-html="choiceTitle">前端还是后端？</h2>
-        <div class="chapter-copy" data-i18n-html="choiceBody">
-          <p>多数人会选择一侧专精。</p>
-        </div>
-      </section>
-
-      <section id="front" class="chapter">
-        <p class="kicker" data-i18n="frontKicker">前端</p>
-        <h2 class="chapter-title" data-i18n="frontTitle">前端是先被看见的这一面。</h2>
-        <ul class="stack" aria-label="这一页的前端" data-i18n-aria="frontList">
-          <li>HTML</li>
-          <li>CSS</li>
-          <li>GSAP</li>
-          <li>ScrollTrigger</li>
-          <li>SplitText</li>
-        </ul>
-        <div class="chapter-copy" data-i18n-html="frontBody">
-          <p>别人打开这一页，先碰到前端。</p>
-          <p>结构是 HTML。样子是 CSS，黑灰的色块一块一块落在这里。</p>
-          <p>GSAP 让这一页动起来。ScrollTrigger 跟着滚动，把下一屏接上来。SplitText 把标题拆开，再让字归位。</p>
+        <div class="folded">
+          <h2 class="cn-title" data-i18n-html="campsTitle">前端与后端，<br>是技术上的<span class="keep">两个阵营</span>。</h2>
+          <div class="prose" data-i18n-html="campsBody">
+            <p>从事技术的人，通常归入前端或后端。</p>
+            <p>多数人选定其中一边，并以这一边作为专长。</p>
+          </div>
+          <h2 class="cn-title" id="choice" data-i18n-html="choiceTitle">前端还是后端？</h2>
+          <div class="prose" data-i18n-html="choiceBody">
+            <p>多数人会选择一侧专精。</p>
+          </div>
         </div>
       </section>
 
-      <section id="back" class="chapter">
-        <p class="kicker" data-i18n="backKicker">后端</p>
-        <h2 class="chapter-title" data-i18n="backTitle">后端是后面那一套。</h2>
-        <ul class="stack" aria-label="后端" data-i18n-aria="backList">
-          <li>Java</li>
-          <li>Python</li>
-          <li>C++</li>
-          <li>SQL</li>
-          <li>Web</li>
-        </ul>
-        <div class="chapter-copy" data-i18n-html="backBody">
-          <p>看见的后面，留着另一套。</p>
-          <p>Java、Python、C++、SQL 和 Web。</p>
-          <p>它们不先站到字面上。后端就是这些。</p>
+      <section class="band" id="work">
+        <p class="kicker" data-i18n="workKicker">作品</p>
+
+        <div class="desk-group">
+          <h2 class="cn-title" data-i18n="projectsTitle">项目</h2>
+          <div class="desk">
+            <article class="sheet sheet-front">
+              <div class="well well-ui">
+                <div class="chrome" aria-hidden="true"></div>
+                <p class="well-label" data-i18n="slotEmpty">待填充</p>
+              </div>
+              <h3 class="sheet-title" data-i18n="slotEmpty">待填充</h3>
+              <p class="sheet-line" data-i18n="slotEmpty">待填充</p>
+              <p class="sheet-meta">
+                <span class="cat cat-front" data-i18n="frontKicker">前端</span>
+                <span class="sheet-link" data-i18n="slotEmpty">待填充</span>
+              </p>
+            </article>
+            <article class="sheet sheet-back">
+              <div class="well well-structure">
+                <div class="blocks" aria-hidden="true"><i></i><i></i><i></i></div>
+                <p class="well-label" data-i18n="slotEmpty">待填充</p>
+              </div>
+              <h3 class="sheet-title" data-i18n="slotEmpty">待填充</h3>
+              <p class="sheet-line" data-i18n="slotEmpty">待填充</p>
+              <p class="sheet-meta">
+                <span class="cat cat-back" data-i18n="backKicker">后端</span>
+                <span class="sheet-link" data-i18n="slotEmpty">待填充</span>
+              </p>
+            </article>
+          </div>
+        </div>
+
+        <div class="desk-group">
+          <h2 class="cn-title" data-i18n="courseTitle">课题</h2>
+          <div class="desk">
+            <article class="sheet sheet-front">
+              <div class="well well-ui">
+                <div class="chrome" aria-hidden="true"></div>
+                <p class="well-label" data-i18n="slotEmpty">待填充</p>
+              </div>
+              <h3 class="sheet-title" data-i18n="slotEmpty">待填充</h3>
+              <p class="sheet-line" data-i18n="slotEmpty">待填充</p>
+              <p class="sheet-meta">
+                <span class="cat cat-front" data-i18n="frontKicker">前端</span>
+                <span class="sheet-link" data-i18n="slotEmpty">待填充</span>
+              </p>
+            </article>
+            <article class="sheet sheet-back">
+              <div class="well well-structure">
+                <div class="blocks" aria-hidden="true"><i></i><i></i><i></i></div>
+                <p class="well-label" data-i18n="slotEmpty">待填充</p>
+              </div>
+              <h3 class="sheet-title" data-i18n="slotEmpty">待填充</h3>
+              <p class="sheet-line" data-i18n="slotEmpty">待填充</p>
+              <p class="sheet-meta">
+                <span class="cat cat-back" data-i18n="backKicker">后端</span>
+                <span class="sheet-link" data-i18n="slotEmpty">待填充</span>
+              </p>
+            </article>
+          </div>
         </div>
       </section>
 
-      <section id="both" class="chapter">
+      <section class="band notes" aria-label="Skills">
+        <article id="front">
+          <p class="kicker" data-i18n="frontKicker">前端</p>
+          <h2 class="note-title" data-i18n="frontTitle">前端是先被看见的这一面。</h2>
+          <ul class="stack" data-i18n-aria="frontList" aria-label="这一页的前端">
+            <li>HTML</li>
+            <li>CSS</li>
+            <li>GSAP</li>
+            <li>ScrollTrigger</li>
+            <li>SplitText</li>
+          </ul>
+          <div class="prose" data-i18n-html="frontBody">
+            <p>别人打开这一页，先碰到前端。</p>
+            <p>结构是 HTML。样子是 CSS，黑灰的色块一块一块落在这里。</p>
+            <p>GSAP 让这一页动起来。ScrollTrigger 跟着滚动，把下一屏接上来。SplitText 把标题拆开，再让字归位。</p>
+          </div>
+        </article>
+        <article id="back">
+          <p class="kicker" data-i18n="backKicker">后端</p>
+          <h2 class="note-title" data-i18n="backTitle">后端是后面那一套。</h2>
+          <ul class="stack" data-i18n-aria="backList" aria-label="后端">
+            <li>Java</li>
+            <li>Python</li>
+            <li>C++</li>
+            <li>SQL</li>
+            <li>Web</li>
+          </ul>
+          <div class="prose" data-i18n-html="backBody">
+            <p>看见的后面，留着另一套。</p>
+            <p>Java、Python、C++、SQL 和 Web。</p>
+            <p>它们不先站到字面上。后端就是这些。</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="band" id="both">
         <p class="kicker" data-i18n="bothKicker">本人</p>
-        <h2 class="chapter-title" data-i18n="bothTitle">朱睿哲两边都做。</h2>
-        <div class="chapter-copy" data-i18n-html="bothBody">
+        <h2 class="cn-title" data-i18n="bothTitle">朱睿哲两边都做。</h2>
+        <div class="prose" data-i18n-html="bothBody">
           <p>我是朱睿哲，也叫 DDjuice。现居中国大陆。一个两边都做的个人开发者，前端和后端都做。</p>
           <p>课业和自己想做的东西，都在同一台笔记本上。喜欢用 Cursor 把它们做出来。</p>
           <p>九点睡觉，冷水浴，读书。2023–2027，在山东师范大学读计算机科学与技术。</p>
@@ -119,14 +208,14 @@
         </div>
       </section>
 
-      <section id="contact" class="chapter">
+      <section class="band" id="contact">
         <p class="kicker" data-i18n="contactKicker">联系</p>
-        <h2 class="chapter-title" data-i18n="contactTitle">想一起做事，或只是打个招呼，都可以写信给我。</h2>
+        <h2 class="cn-title" data-i18n="contactTitle">想一起做事，或只是打个招呼，都可以写信给我。</h2>
         <ul class="links">
           <li><a href="mailto:ddjuice2004@gmail.com">ddjuice2004@gmail.com</a></li>
           <li><a href="https://github.com/DDjuicee" target="_blank" rel="noreferrer">GitHub</a></li>
         </ul>
-        <footer inert data-gate-inert>
+        <footer>
           <p data-i18n-html="footer">DDjuice · 朱睿哲 · 本地个人页</p>
           <p class="beian">
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">鲁ICP备2026064080号-1</a>
